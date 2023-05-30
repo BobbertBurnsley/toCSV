@@ -2,6 +2,43 @@
 <html>
   <head>
     <title>Form to CSV</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .form-container {
+        width: 400px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+
+      .form-container label {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .form-container input,
+      .form-container textarea {
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 10px;
+      }
+
+      .form-container button {
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
       $(document).ready(function () {
@@ -32,22 +69,36 @@
     </script>
   </head>
   <body>
-    <h2>Form to CSV</h2>
-    <label for="name">Name:</label>
-    <input type="text" id="name" required /><br /><br />
+    <div class="form-container">
+      <h2>Form to CSV</h2>
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" required />
+      </div>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" required /><br /><br />
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" required />
+      </div>
 
-    <label for="course">Course:</label>
-    <input type="text" id="course" required /><br /><br />
+      <div>
+        <label for="course">Course:</label>
+        <input type="text" id="course" required />
+      </div>
 
-    <label for="professor">Professor:</label>
-    <input type="text" id="professor" required /><br /><br />
+      <div>
+        <label for="professor">Professor:</label>
+        <input type="text" id="professor" required />
+      </div>
 
-    <label for="comments">Comments:</label>
-    <textarea id="comments" rows="4" required></textarea><br /><br />
+      <div>
+        <label for="comments">Comments:</label>
+        <textarea id="comments" rows="4" required></textarea>
+      </div>
 
-    <button id="submitBtn">Submit</button>
+      <div>
+        <button id="submitBtn">Submit</button>
+      </div>
+    </div>
   </body>
 </html>
