@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Form to CSV</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#submitBtn").click(function () {
+          var name = $("#name").val();
+          var email = $("#email").val();
+          var message = $("#message").val();
+
+          // Send the form data to the server-side API
+          $.ajax({
+            url: "api/save_data.php",
+            method: "POST",
+            data: {
+              name: name,
+              email: email,
+              message: message,
+            },
+            success: function (response) {
+              alert(response);
+            },
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h2>Form to CSV</h2>
+    <label for="name">Name:</label>
+    <input type="text" id="name" required /><br /><br />
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" required /><br /><br />
+
+    <label for="message">Message:</label>
+    <textarea id="message" rows="4" required></textarea><br /><br />
+
+    <button id="submitBtn">Submit</button>
+  </body>
+</html>
