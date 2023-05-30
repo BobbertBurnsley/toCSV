@@ -8,7 +8,8 @@
         $("#submitBtn").click(function () {
           var name = $("#name").val();
           var email = $("#email").val();
-          var message = $("#message").val();
+          var course = $("#course").val();
+          var proffesor = $(#"professor").val();
 
           // Send the form data to the server-side API
           $.ajax({
@@ -17,7 +18,9 @@
             data: {
               name: name,
               email: email,
-              message: message,
+              course: course, 
+              professor: professor,
+                            
             },
             success: function (response) {
               alert(response);
