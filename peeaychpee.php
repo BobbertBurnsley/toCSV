@@ -29,6 +29,6 @@ $db->close();
 $commentsDB->close();
 
 // Send a success response
-echo "Form data and comments have been saved.";
+echo "Form data and comments/questions have been saved.";
 ?>
 
