@@ -79,5 +79,46 @@ int main() {
 
     std::ofstream outputFile("output.csv");
     outputFile << "Name,Email,Course,Professor\n";
+    
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const char* nameResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        const char* emailResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        const char* courseResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+        const char* professorResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3));
+
+        outputFile << nameResult << "," << emailResult << "," << courseResult << "," << professorResult << "\n";
+    }
+
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+
+    std::cout << "CSV file has been generated successfully." << std::endl;
+
+    // Comments Database
+    std::string selectCommentsQuery = "SELECT * FROM comments;";
+    sqlite3_stmt *commentsStmt;
+    rc = sqlite3_prepare_v2(commentsDB, selectCommentsQuery.c_str(), -1, &commentsStmt, nullptr);
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "Cannot prepare select statement for comments: " << sqlite3_errmsg(commentsDB) << std::endl;
+        return rc;
+    }
+
+    std::ofstream commentsOutputFile("comments.csv");
+    commentsOutputFile << "Comment\n";
+
+    while (sqlite3_step(commentsStmt) == SQLITE_ROW) {
+        const char* commentResult = reinterpret_cast<const char*>(sqlite3_column_text(commentsStmt, 0));
+        commentsOutputFile << commentResult << "\n";
+    }
+
+    sqlite3_finalize(commentsStmt);
+    sqlite3_close(commentsDB);
+
+    std::cout << "Comments CSV file has been generated successfully." << std::endl;
+
+    return 0;
+}
+
 
     
