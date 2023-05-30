@@ -2,16 +2,18 @@
 #include <sqlite3.h>
 #include <fstream>
 
+static int callback(void *, int, char **, char **);
+
 int main() {
     sqlite3 *db;
     int rc = sqlite3_open(":memory:", &db);
 
     if (rc != SQLITE_OK) {
-        std::cerr << "Cannot open SQLite database: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
         return rc;
     }
 
-    const char* createTableQuery = "CREATE TABLE form_data (name TEXT, email TEXT, message TEXT);";
+    const char* createTableQuery = "CREATE TABLE form_data (name TEXT, email TEXT, course TEXT, professor TEXT, comments TEXT);";
     rc = sqlite3_exec(db, createTableQuery, 0, 0, 0);
 
     if (rc != SQLITE_OK) {
@@ -19,48 +21,42 @@ int main() {
         return rc;
     }
 
-    std::string name, email, message;
-    std::cout << "Name: ";
-    std::getline(std::cin, name);
+    std::string name, email, course, professor, comments;
 
-    std::cout << "Email: ";
-    std::getline(std::cin, email);
+    std::cout << "Content-type:text/html\r\n\r\n";
+    std::cout << "<html>\n";
+    std::cout << "<head>\n";
+    std::cout << "<title>Form Submission Result</title>\n";
+    std::cout << "</head>\n";
+    std::cout << "<body>\n";
 
-    std::cout << "Message: ";
-    std::getline(std::cin, message);
+    // Read form input from CGI environment variables
+    char *data = getenv("QUERY_STRING");
 
-    std::string insertQuery = "INSERT INTO form_data (name, email, message) VALUES ('" + name + "', '" + email + "', '" + message + "');";
-    rc = sqlite3_exec(db, insertQuery.c_str(), 0, 0, 0);
+    if (data != nullptr) {
+        sscanf(data, "name=%[^&]&email=%[^&]&course=%[^&]&professor=%[^&]&comments=%s", name, email, course, professor, comments);
 
-    if (rc != SQLITE_OK) {
-        std::cerr << "Cannot insert data: " << sqlite3_errmsg(db) << std::endl;
-        return rc;
+        std::string insertQuery = "INSERT INTO form_data (name, email, course, professor, comments) VALUES ('" + name + "', '" + email + "', '" + course + "', '" + professor + "', '" + comments + "');";
+        rc = sqlite3_exec(db, insertQuery.c_str(), 0, 0, 0);
+
+        if (rc != SQLITE_OK) {
+            std::cerr << "Cannot insert data: " << sqlite3_errmsg(db) << std::endl;
+            return rc;
+        }
+
+        std::cout << "<h2>Form submitted successfully!</h2>\n";
+        std::cout << "<p>Name: " << name << "</p>\n";
+        std::cout << "<p>Email: " << email << "</p>\n";
+        std::cout << "<p>Course: " << course << "</p>\n";
+        std::cout << "<p>Professor: " << professor << "</p>\n";
+        std::cout << "<p>Comments: " << comments << "</p>\n";
     }
 
-    std::string selectQuery = "SELECT * FROM form_data;";
-    sqlite3_stmt *stmt;
-    rc = sqlite3_prepare_v2(db, selectQuery.c_str(), -1, &stmt, nullptr);
+    std::cout << "</body>\n";
+    std::cout << "</html>\n";
 
-    if (rc != SQLITE_OK) {
-        std::cerr << "Cannot prepare select statement: " << sqlite3_errmsg(db) << std::endl;
-        return rc;
-    }
-
-    std::ofstream outputFile("output.csv");
-    outputFile << "Name,Email,Message\n";
-
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        const char* nameResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        const char* emailResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        const char* messageResult = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
-
-        outputFile << nameResult << "," << emailResult << "," << messageResult << "\n";
-    }
-
-    sqlite3_finalize(stmt);
     sqlite3_close(db);
-
-    std::cout << "CSV file has been generated successfully." << std::endl;
 
     return 0;
 }
+
