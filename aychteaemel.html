@@ -9,7 +9,8 @@
           var name = $("#name").val();
           var email = $("#email").val();
           var course = $("#course").val();
-          var proffesor = $(#"professor").val();
+          var professor = $("#professor").val();
+          var comments = $("#comments").val();
 
           // Send the form data to the server-side API
           $.ajax({
@@ -18,9 +19,9 @@
             data: {
               name: name,
               email: email,
-              course: course, 
+              course: course,
               professor: professor,
-                            
+              comments: comments, // Include comments in the data
             },
             success: function (response) {
               alert(response);
@@ -38,8 +39,14 @@
     <label for="email">Email:</label>
     <input type="email" id="email" required /><br /><br />
 
-    <label for="message">Message:</label>
-    <textarea id="message" rows="4" required></textarea><br /><br />
+    <label for="course">Course:</label>
+    <input type="text" id="course" required /><br /><br />
+
+    <label for="professor">Professor:</label>
+    <input type="text" id="professor" required /><br /><br />
+
+    <label for="comments">Comments:</label>
+    <textarea id="comments" rows="4" required></textarea><br /><br />
 
     <button id="submitBtn">Submit</button>
   </body>
