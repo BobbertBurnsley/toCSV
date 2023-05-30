@@ -2,18 +2,16 @@
 #include <sqlite3.h>
 #include <fstream>
 
-static int callback(void *, int, char **, char **);
-
 int main() {
     sqlite3 *db;
     int rc = sqlite3_open(":memory:", &db);
 
     if (rc != SQLITE_OK) {
-        std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Cannot open SQLite database: " << sqlite3_errmsg(db) << std::endl;
         return rc;
     }
 
-    const char* createTableQuery = "CREATE TABLE form_data (name TEXT, email TEXT, course TEXT, professor TEXT, comments TEXT);";
+    const char* createTableQuery = "CREATE TABLE form_data (name TEXT, email TEXT, course TEXT, professor TEXT);";
     rc = sqlite3_exec(db, createTableQuery, 0, 0, 0);
 
     if (rc != SQLITE_OK) {
@@ -21,42 +19,65 @@ int main() {
         return rc;
     }
 
-    std::string name, email, course, professor, comments;
+    std::string name, email, course, professor;
+    std::cout << "Name: ";
+    std::getline(std::cin, name);
 
-    std::cout << "Content-type:text/html\r\n\r\n";
-    std::cout << "<html>\n";
-    std::cout << "<head>\n";
-    std::cout << "<title>Form Submission Result</title>\n";
-    std::cout << "</head>\n";
-    std::cout << "<body>\n";
+    std::cout << "Email: ";
+    std::getline(std::cin, email);
 
-    // Read form input from CGI environment variables
-    char *data = getenv("QUERY_STRING");
+    std::cout << "Course: ";
+    std::getline(std::cin, course);
 
-    if (data != nullptr) {
-        sscanf(data, "name=%[^&]&email=%[^&]&course=%[^&]&professor=%[^&]&comments=%s", name, email, course, professor, comments);
+    std::cout << "Professor: ";
+    std::getline(std::cin, professor);
 
-        std::string insertQuery = "INSERT INTO form_data (name, email, course, professor, comments) VALUES ('" + name + "', '" + email + "', '" + course + "', '" + professor + "', '" + comments + "');";
-        rc = sqlite3_exec(db, insertQuery.c_str(), 0, 0, 0);
+    std::cout << "Comments: ";
+    std::string comments;
+    std::getline(std::cin, comments);
 
-        if (rc != SQLITE_OK) {
-            std::cerr << "Cannot insert data: " << sqlite3_errmsg(db) << std::endl;
-            return rc;
-        }
+    std::string insertQuery = "INSERT INTO form_data (name, email, course, professor) VALUES ('" + name + "', '" + email + "', '" + course + "', '" + professor + "');";
+    rc = sqlite3_exec(db, insertQuery.c_str(), 0, 0, 0);
 
-        std::cout << "<h2>Form submitted successfully!</h2>\n";
-        std::cout << "<p>Name: " << name << "</p>\n";
-        std::cout << "<p>Email: " << email << "</p>\n";
-        std::cout << "<p>Course: " << course << "</p>\n";
-        std::cout << "<p>Professor: " << professor << "</p>\n";
-        std::cout << "<p>Comments: " << comments << "</p>\n";
+    if (rc != SQLITE_OK) {
+        std::cerr << "Cannot insert data: " << sqlite3_errmsg(db) << std::endl;
+        return rc;
     }
 
-    std::cout << "</body>\n";
-    std::cout << "</html>\n";
+    sqlite3 *commentsDB;
+    rc = sqlite3_open(":memory:", &commentsDB);
 
-    sqlite3_close(db);
+    if (rc != SQLITE_OK) {
+        std::cerr << "Cannot open SQLite comments database: " << sqlite3_errmsg(commentsDB) << std::endl;
+        return rc;
+    }
 
-    return 0;
-}
+    const char* createCommentsTableQuery = "CREATE TABLE comments (comment TEXT);";
+    rc = sqlite3_exec(commentsDB, createCommentsTableQuery, 0, 0, 0);
 
+    if (rc != SQLITE_OK) {
+        std::cerr << "Cannot create comments table: " << sqlite3_errmsg(commentsDB) << std::endl;
+        return rc;
+    }
+
+    std::string insertCommentsQuery = "INSERT INTO comments (comment) VALUES ('" + comments + "');";
+    rc = sqlite3_exec(commentsDB, insertCommentsQuery.c_str(), 0, 0, 0);
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "Cannot insert comments: " << sqlite3_errmsg(commentsDB) << std::endl;
+        return rc;
+    }
+
+    std::string selectQuery = "SELECT * FROM form_data;";
+    sqlite3_stmt *stmt;
+    rc = sqlite3_prepare_v2(db, selectQuery.c_str(), -1, &stmt, nullptr);
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "Cannot prepare select statement: " << sqlite3_errmsg(db) << std::endl;
+        return rc;
+    }
+
+    std::ofstream outputFile("output.csv");
+    outputFile << "Name,Email,Course,Professor\n";
+
+    
